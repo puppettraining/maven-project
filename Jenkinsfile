@@ -3,11 +3,14 @@ pipeline {
 
 	agent any
 
+	tools {
+		maven 'localMaven'	
+	}
+
 	stages {
 		stage ('Build and Archive') {
 
 			steps {
-
 				sh 'mvn clean package'
 			}
 			
