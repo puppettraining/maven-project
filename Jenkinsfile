@@ -18,29 +18,31 @@ pipeline {
 	}
 
 	stages {
+		
+		stage ('Build and Test') {
+			parallel {
+				stage ('Build and Archive') {
 
-		parallel {
-			stage ('Build and Archive') {
-
-				steps {
-					sh 'mvn clean package'
-				}
-			
-				post {
-					success {
-						echo 'Now archiving...'
-						archiveArtifacts artifacts: '**/target/*.war'
+					steps {
+						sh 'mvn clean package'
 					}
-				}
+			
+					post {
+						success {
+							echo 'Now archiving...'
+							archiveArtifacts artifacts: '**/target/*.war'
+						}
+					}
 
-			}
-	
-			stage ('Checkstyle') {
-			
-				steps {
-					sh 'mvn checkstyle:checkstyle'
 				}
+	
+				stage ('Checkstyle') {
 			
+					steps {
+						sh 'mvn checkstyle:checkstyle'
+					}
+			
+				}
 			}
 		}
 		
