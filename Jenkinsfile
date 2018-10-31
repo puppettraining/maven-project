@@ -3,31 +3,51 @@ pipeline {
 
 	agent any
 
+	parameters {
+		string(name: 'tomcat_dev', defaultValue: 'localhost', description: 'IP address of dev tomcat server')
+		string(name: 'tomcat_prod', defaultValue: 'localhost', description: 'IIP address of prod tomcat server')
+	}
+	
+	triggers {
+		pollSCM ('* * * * *')
+	}
+
 	tools {
 		maven 'localMaven'
 		jdk 'localJDK'
 	}
 
 	stages {
-		stage ('Build and Archive') {
 
-			steps {
-				sh 'mvn clean package'
-			}
-			
-			post {
-				success {
-					echo 'Now archiving...'
-					archiveArtifacts artifacts: '**/target/*.war'
+		parallel {
+			stage ('Build and Archive') {
+
+				steps {
+					sh 'mvn clean package'
 				}
-			}
+			
+				post {
+					success {
+						echo 'Now archiving...'
+						archiveArtifacts artifacts: '**/target/*.war'
+					}
+				}
 
-		}
+			}
 	
+			stage ('Checkstyle') {
+			
+				steps {
+					sh 'mvn checkstyle:checkstyle'
+				}
+			
+			}
+		}
+		
 		stage ('Deploy to Staging') {
 			
 			steps{
-				build job: 'deploy-to-stage'
+				sh 'scp **/target/*.war ${params.tomcat_dev}:/opt/apache-tomcat-8.5.34-staging/webapps/'
 			}
 			
 		}
@@ -39,7 +59,7 @@ pipeline {
 					input message: 'Do you approve PRODUCTION deployment?'
 				}
 				
-				build job: 'deploy-to-prod'
+				sh 'scp **/target/*.war ${params.tomcat_prod}:/opt/apache-tomcat-8.5.34-prod/webapps/'
 			}
 			
 			post {
