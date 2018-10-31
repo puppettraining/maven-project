@@ -49,7 +49,7 @@ pipeline {
 		stage ('Deploy to Staging') {
 			
 			steps{
-				sh 'scp **/target/*.war ${params.tomcat_dev}:/opt/apache-tomcat-8.5.34-staging/webapps/'
+				sh "scp **/target/*.war ${params.tomcat_dev}:/opt/apache-tomcat-8.5.34-staging/webapps/"
 			}
 			
 		}
@@ -61,7 +61,7 @@ pipeline {
 					input message: 'Do you approve PRODUCTION deployment?'
 				}
 				
-				sh 'scp **/target/*.war ${params.tomcat_prod}:/opt/apache-tomcat-8.5.34-prod/webapps/'
+				sh "scp **/target/*.war ${params.tomcat_prod}:/opt/apache-tomcat-8.5.34-prod/webapps/"
 			}
 			
 			post {
